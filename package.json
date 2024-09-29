@@ -1,7 +1,7 @@
 {
   "type": "module",
-  "name": "server-codes",
-  "description": "This project was bootstrapped with Fastify-CLI.",
+  "name": "peak-server-codes",
+  "description": "This is a microservice for searching and looking up standardized medical codes.",
   "version": "1.0.0",
   "main": "app.js",
   "directories": {
@@ -10,13 +10,13 @@
   "scripts": {
     "test": "node --test test/**/*.test.js",
     "start": "fastify start -l info app.js",
-    "dev": "fastify start -w -l info -P app.js",
+    "dev": "fastify start -w -l info -P app.js --ignore-watch='.git data test'",
     "pretest": "standard",
     "lint": "standard --fix"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Francis Li <francis@peakresponse.net>",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "fastify": "^5.0.0",
     "fastify-plugin": "^5.0.0",
