@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ICD10CMChapter {
+  name        String              @id
+  position    Int
+  desc        String?
+  sections    ICD10CMSection[]
+}
+
+model ICD10CMSection {
+  id          String              @id
+  desc        String?
+  chapter     ICD10CMChapter      @relation(fields: [chapterId], references: [name])
+  chapterId   String
+  codes       ICD10CMCode[]
+}
+
+model ICD10CMCode {
+  name        String              @id
+  desc        String?
+  section     ICD10CMSection      @relation(fields: [sectionId], references: [id])
+  sectionId   String
+  parent      ICD10CMCode?        @relation("ICD10CMCodeHierarchy", fields: [parentId], references: [name])
+  parentId    String?
+  children    ICD10CMCode[]       @relation("ICD10CMCodeHierarchy")
+  depth       Int
+  lft         Int
+  rgt         Int?
+}
