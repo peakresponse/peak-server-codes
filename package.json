@@ -11,8 +11,8 @@
     "test": "node --test test/**/*.test.js",
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js --ignore-watch='.git data test'",
-    "pretest": "standard",
-    "lint": "standard --fix"
+    "pretest": "semistandard",
+    "lint": "semistandard --fix"
   },
   "keywords": [],
   "author": "Francis Li <francis@peakresponse.net>",
@@ -28,6 +28,6 @@
   "devDependencies": {
     "c8": "^10.1.2",
     "prisma": "^5.20.0",
-    "standard": "^17.0.0"
+    "semistandard": "^17.0.0"
   }
 }
