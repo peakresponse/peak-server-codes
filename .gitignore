@@ -60,3 +60,4 @@ profile*
 # local dev data
 .env
 data
+*.xml

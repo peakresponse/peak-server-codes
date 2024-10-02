@@ -1,0 +1,153 @@
+#!/usr/bin/env node
+
+import fs from 'node:fs';
+import sax from 'sax';
+import { PrismaClient } from '@prisma/client';
+
+const { argv } = process;
+if (argv.length !== 3) {
+  console.log('Usage: bin/import-icd10cm [path or URL to tabular XML file]');
+  process.exit(1);
+}
+
+async function * saxIterator (iterable) {
+  const saxStream = sax.createStream(true, {});
+  let error;
+  saxStream.on('error', (err) => (error = err));
+  let events = [];
+  saxStream.on('opentag', (value) => events.push({ eventType: 'opentag', value }));
+  saxStream.on('text', (value) => events.push({ eventType: 'text', value }));
+  saxStream.on('closetag', (value) => events.push({ eventType: 'closetag', value }));
+  for await (const chunk of iterable) {
+    saxStream.write(chunk.toString());
+    if (error) throw error;
+    yield events;
+    events = [];
+  }
+}
+
+const prisma = new PrismaClient();
+
+let chapter = null;
+let section = null;
+const codes = [];
+let text = '';
+let index = 1;
+
+codes.last = function () {
+  const { length } = this;
+  if (length > 0) {
+    return this[length - 1];
+  }
+  return null;
+};
+
+const stream = fs.createReadStream(argv[2]);
+for await (const events of saxIterator(stream)) {
+  const queries = [];
+  for (const event of events) {
+    if (event.eventType === 'opentag') {
+      const { name, attributes } = event.value ?? {};
+      switch (name) {
+        case 'chapter':
+          chapter = {};
+          break;
+        case 'section':
+          section = {
+            id: attributes?.id,
+            chapterName: chapter?.name
+          };
+          queries.push(
+            prisma.icd10CMSection.upsert({
+              where: { id: section.id },
+              update: section,
+              create: section
+            }));
+          break;
+        case 'diag':
+          process.stdout.write('.');
+          codes.push({
+            sectionId: section?.id,
+            parentName: codes.last()?.name,
+            depth: codes.length,
+            lft: index
+          });
+          index += 1;
+          break;
+        default:
+          text = '';
+      }
+    } else if (event.eventType === 'text') {
+      text = `${text}${event.value ?? ''}`;
+    } else if (event.eventType === 'closetag') {
+      const name = event.value;
+      let code;
+      switch (name) {
+        case 'chapter':
+          chapter = null;
+          break;
+        case 'section':
+          section = null;
+          break;
+        case 'diag':
+          code = codes.pop();
+          if (code) {
+            code.rgt = index;
+            index += 1;
+            queries.push(prisma.icd10CMCode.upsert({
+              where: { name: code.name },
+              update: code,
+              create: code
+            }));
+          }
+          break;
+        case 'name':
+          code = codes.last();
+          if (code) {
+            code.name = text.trim();
+            queries.push(prisma.icd10CMCode.upsert({
+              where: { name: code.name },
+              update: code,
+              create: code
+            }));
+          } else if (chapter) {
+            chapter.name = text.trim();
+            chapter.position = parseInt(chapter.name, 10);
+            queries.push(prisma.icd10CMChapter.upsert({
+              where: { name: chapter.name },
+              update: chapter,
+              create: chapter
+            }));
+          }
+          break;
+        case 'desc':
+          code = codes.last();
+          if (code) {
+            code.desc = text.trim();
+            queries.push(prisma.icd10CMCode.upsert({
+              where: { name: code.name },
+              update: code,
+              create: code
+            }));
+          } else if (section) {
+            section.desc = text.trim();
+            queries.push(prisma.icd10CMSection.upsert({
+              where: { id: section.id },
+              update: section,
+              create: section
+            }));
+          } else if (chapter) {
+            chapter.desc = text.trim();
+            queries.push(prisma.icd10CMChapter.upsert({
+              where: { name: chapter.name },
+              update: chapter,
+              create: chapter
+            }));
+          }
+          break;
+      }
+    }
+  }
+  await prisma.$transaction(queries);
+}
+console.log('\ndone!');
