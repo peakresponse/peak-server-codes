@@ -86,7 +86,6 @@ export default async function (fastify, opts) {
         }
       }
     };
-    console.log(request.body);
     const records = await fastify.prisma.icd10CMCode.findMany(options);
     reply.send(records);
   });
