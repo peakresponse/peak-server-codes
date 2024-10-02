@@ -10,30 +10,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model ICD10CMChapter {
+model Icd10CMChapter {
   name        String              @id
   position    Int
   desc        String?
-  sections    ICD10CMSection[]
+  sections    Icd10CMSection[]
+
+  @@map("icd10_cm_chapters")
 }
 
-model ICD10CMSection {
+model Icd10CMSection {
   id          String              @id
   desc        String?
-  chapter     ICD10CMChapter      @relation(fields: [chapterId], references: [name])
-  chapterId   String
-  codes       ICD10CMCode[]
+  chapter     Icd10CMChapter      @relation(fields: [chapterName], references: [name])
+  chapterName String @map("chapter_name")
+  codes       Icd10CMCode[]
+
+  @@map("icd10_cm_sections")
 }
 
-model ICD10CMCode {
+model Icd10CMCode {
   name        String              @id
   desc        String?
-  section     ICD10CMSection      @relation(fields: [sectionId], references: [id])
-  sectionId   String
-  parent      ICD10CMCode?        @relation("ICD10CMCodeHierarchy", fields: [parentId], references: [name])
-  parentId    String?
-  children    ICD10CMCode[]       @relation("ICD10CMCodeHierarchy")
+  section     Icd10CMSection      @relation(fields: [sectionId], references: [id])
+  sectionId   String @map("section_id")
+  parent      Icd10CMCode?        @relation("ICD10CMCodeHierarchy", fields: [parentName], references: [name])
+  parentName  String? @map("parent_name")
+  children    Icd10CMCode[]       @relation("ICD10CMCodeHierarchy")
   depth       Int
   lft         Int
   rgt         Int?
+
+  @@map("icd10_cm_codes")
 }

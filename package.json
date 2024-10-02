@@ -28,6 +28,7 @@
   "devDependencies": {
     "c8": "^10.1.2",
     "prisma": "^5.20.0",
+    "sax": "^1.4.1",
     "semistandard": "^17.0.0"
   }
 }
