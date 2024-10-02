@@ -1,0 +1,41 @@
+entity: icd10CMSection
+items:
+  section1:
+    id: A00-A09
+    desc: Intestinal infectious diseases (A00-A09)
+    chapterName: '1'
+  section2:
+    id: A15-A19
+    desc: Tuberculosis (A15-A19)
+    chapterName: '1'
+  section3:
+    id: A20-A28
+    desc: Certain zoonotic bacterial diseases (A20-A28)
+    chapterName: '1'
+  section4:
+    id: C00-C14
+    desc: Malignant neoplasms of lip, oral cavity and pharynx (C00-C14)
+    chapterName: '2'
+  section5:
+    id: C00-C75
+    desc: >-
+      Malignant neoplasms, stated or presumed to be primary (of specified sites),
+      and certain specified histologies, except neuroendocrine, and of lymphoid,
+      hematopoietic and related tissue (C00-C75)
+    chapterName: '2'
+  section6:
+    id: C00-C96
+    desc: Malignant neoplasms (C00-C96)
+    chapterName: '2'
+  section7:
+    id: D50-D53
+    desc: Nutritional anemias (D50-D53)
+    chapterName: '3'
+  section8:
+    id: D55-D59
+    desc: Hemolytic anemias (D55-D59)
+    chapterName: '3'
+  section9:
+    id: D60-D64
+    desc: Aplastic and other anemias and other bone marrow failure syndromes (D60-D64)
+    chapterName: '3'

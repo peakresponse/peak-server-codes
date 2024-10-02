@@ -1,0 +1,50 @@
+entity: icd10CMCode
+connectedFields: ['section']
+processor: ../ICD10CMCodeProcessor
+items:
+  code1:
+    name: A00
+    desc: Cholera
+    section: '@section1'
+    depth: 0
+    lft: 1
+    rgt: 8
+  code2:
+    name: A00.0
+    desc: 'Cholera due to Vibrio cholerae 01, biovar cholerae'
+    section: '@section1'
+    parentName: A00
+    depth: 1
+    lft: 2
+    rgt: 3
+  code3:
+    name: A00.1
+    desc: 'Cholera due to Vibrio cholerae 01, biovar eltor'
+    section: '@section1'
+    parentName: A00
+    depth: 1
+    lft: 4
+    rgt: 5
+  code4:
+    name: A15
+    desc: Respiratory tuberculosis
+    section: '@section2'
+    depth: 0
+    lft: 189
+    rgt: 204
+  code5:
+    name: A15.0
+    desc: Tuberculosis of lung
+    section: '@section2'
+    parentName: A15
+    depth: 1
+    lft: 190
+    rgt: 191
+  code6:
+    name: A15.4
+    desc: Tuberculosis of intrathoracic lymph nodes
+    section: '@section2'
+    parentName: A15
+    depth: 1
+    lft: 192
+    rgt: 193

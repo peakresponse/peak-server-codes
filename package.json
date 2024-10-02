@@ -8,11 +8,12 @@
     "test": "test"
   },
   "scripts": {
-    "test": "node --test test/**/*.test.js",
     "start": "fastify start -l info app.js",
     "dev": "fastify start -w -l info -P app.js --ignore-watch='.git data test'",
     "pretest": "semistandard",
-    "lint": "semistandard --fix"
+    "lint": "semistandard --fix",
+    "test": "node --test-concurrency 1 --test $(find test -name '*.test.js')",
+    "test:db:reset": "DATABASE_URL=${DATABASE_URL}_test npx prisma migrate reset --force"
   },
   "keywords": [],
   "author": "Francis Li <francis@peakresponse.net>",
@@ -29,6 +30,7 @@
     "http-status-codes": "^2.3.0"
   },
   "devDependencies": {
+    "@getbigger-io/prisma-fixtures-cli": "^2.0.1",
     "c8": "^10.1.2",
     "prisma": "^5.20.0",
     "sax": "^1.4.1",

@@ -1,0 +1,14 @@
+entity: icd10CMChapter
+items:
+  chapter1:
+    name: '1'
+    position: 1
+    desc: Certain infectious and parasitic diseases (A00-B99)
+  chapter2:
+    name: '2'
+    position: 2
+    desc: Neoplasms (C00-D49)
+  chapter3:
+    name: '3'
+    position: 3
+    desc: Diseases of the blood and blood-forming organs and certain disorders involving the immune mechanism (D50-D89)
