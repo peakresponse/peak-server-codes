@@ -50,4 +50,44 @@ export default async function (fastify, opts) {
     const { records, total } = await fastify.prisma.icd10CMCode.paginate(options);
     reply.setPaginationHeaders(page, perPage, total).send(records);
   });
+
+  fastify.post('', {
+    schema: {
+      body: {
+        type: 'array',
+        items: {
+          type: 'string'
+        }
+      },
+      response: {
+        [StatusCodes.OK]: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              desc: { type: 'string' },
+              sectionId: { type: 'string' },
+              parentName: { type: 'string' },
+              depth: { type: 'integer' },
+              lft: { type: 'integer' },
+              rgt: { type: 'integer' }
+            }
+          }
+        }
+      }
+    }
+  },
+  async function (request, reply) {
+    const options = {
+      where: {
+        name: {
+          in: request.body
+        }
+      }
+    };
+    console.log(request.body);
+    const records = await fastify.prisma.icd10CMCode.findMany(options);
+    reply.send(records);
+  });
 }
