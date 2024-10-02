@@ -6,8 +6,6 @@ export default async function (fastify, opts) {
       querystring: {
         type: 'object',
         properties: {
-          sectionId: { type: 'string' },
-          level: { type: 'integer' },
           page: { type: 'integer' },
           perPage: { type: 'integer' }
         }
@@ -19,12 +17,8 @@ export default async function (fastify, opts) {
             type: 'object',
             properties: {
               name: { type: 'string' },
-              desc: { type: 'string' },
-              sectionId: { type: 'string' },
-              parentName: { type: 'string' },
-              depth: { type: 'integer' },
-              lft: { type: 'integer' },
-              rgt: { type: 'integer' }
+              position: { type: 'integer' },
+              desc: { type: 'string' }
             }
           }
         }
@@ -32,22 +26,15 @@ export default async function (fastify, opts) {
     }
   },
   async function (request, reply) {
-    const { page = '1', perPage = '25', sectionId, level } = request.query;
+    const { page = '1', perPage = '25' } = request.query;
     const options = {
-      where: {},
       page,
       perPage,
       orderBy: [
-        { name: 'asc' }
+        { position: 'asc' }
       ]
     };
-    if (sectionId) {
-      options.where.sectionId = sectionId;
-    }
-    if ((level ?? null) !== null) {
-      options.where.depth = level;
-    }
-    const { records, total } = await fastify.prisma.icd10CMCode.paginate(options);
+    const { records, total } = await fastify.prisma.icd10CMChapter.paginate(options);
     reply.setPaginationHeaders(page, perPage, total).send(records);
   });
 }
