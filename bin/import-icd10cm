@@ -13,9 +13,7 @@ if (argv.length !== 3) {
 async function * saxIterator (iterable) {
   const saxStream = sax.createStream(true, {});
   let error;
-  saxStream.on('error', err => {
-    error = err;
-  });
+  saxStream.on('error', (err) => (error = err));
   let events = [];
   saxStream.on('opentag', (value) => events.push({ eventType: 'opentag', value }));
   saxStream.on('text', (value) => events.push({ eventType: 'text', value }));
@@ -28,9 +26,7 @@ async function * saxIterator (iterable) {
   }
 }
 
-const prisma = new PrismaClient({
-  datasourceUrl: `${process.env.DATABASE_URL}?connection_limit=1`
-});
+const prisma = new PrismaClient();
 
 let chapter = null;
 let section = null;
