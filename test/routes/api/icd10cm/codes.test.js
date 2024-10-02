@@ -96,4 +96,36 @@ describe('/api/icd10cm/codes', () => {
       ]);
     });
   });
+
+  describe('POST /', () => {
+    it('returns a list of codes matching the names posted', async (t) => {
+      const app = await build(t);
+      await t.loadFixtures();
+      const res = await app.inject().post('/api/icd10cm/codes').payload([
+        'A00.1', 'A15.4'
+      ]);
+      const records = JSON.parse(res.payload);
+      assert.deepStrictEqual(records.length, 2);
+      assert.deepStrictEqual(records, [
+        {
+          name: 'A00.1',
+          desc: 'Cholera due to Vibrio cholerae 01, biovar eltor',
+          sectionId: 'A00-A09',
+          parentName: 'A00',
+          depth: 1,
+          lft: 4,
+          rgt: 5
+        },
+        {
+          name: 'A15.4',
+          desc: 'Tuberculosis of intrathoracic lymph nodes',
+          sectionId: 'A15-A19',
+          parentName: 'A15',
+          depth: 1,
+          lft: 192,
+          rgt: 193
+        }
+      ]);
+    });
+  });
 });
