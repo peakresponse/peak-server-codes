@@ -28,19 +28,23 @@ async function * saxIterator (iterable) {
 
 const prisma = new PrismaClient();
 
+// eslint-disable-next-line no-extend-native
+Object.defineProperty(Array.prototype, 'last', {
+  value: function () {
+    const { length } = this;
+    if (length > 0) {
+      return this[length - 1];
+    }
+    return null;
+  }
+});
+
 let chapter = null;
 let section = null;
 const codes = [];
+const seventhCharCodes = [];
 let text = '';
 let index = 1;
-
-codes.last = function () {
-  const { length } = this;
-  if (length > 0) {
-    return this[length - 1];
-  }
-  return null;
-};
 
 const stream = fs.createReadStream(argv[2]);
 for await (const events of saxIterator(stream)) {
@@ -72,8 +76,15 @@ for await (const events of saxIterator(stream)) {
             depth: codes.length,
             lft: index
           });
+          seventhCharCodes.push(null);
           index += 1;
           break;
+        case 'sevenChrDef':
+          seventhCharCodes[seventhCharCodes.length - 1] = [];
+          break;
+        case 'extension':
+          seventhCharCodes.last()?.push({ char: attributes.char });
+          // fallthrough
         default:
           text = '';
       }
@@ -82,6 +93,7 @@ for await (const events of saxIterator(stream)) {
     } else if (event.eventType === 'closetag') {
       const name = event.value;
       let code;
+      let seventhChars;
       switch (name) {
         case 'chapter':
           chapter = null;
@@ -91,7 +103,25 @@ for await (const events of saxIterator(stream)) {
           break;
         case 'diag':
           code = codes.pop();
+          seventhChars = seventhCharCodes.filter(Boolean)[0];
           if (code) {
+            if (index - code.lft === 1 && seventhChars) {
+              for (const seventhChar of seventhChars) {
+                const childCode = { ...code };
+                childCode.parentName = code.name;
+                childCode.name = `${code.name.padEnd(7, 'X')}${seventhChar.char}`;
+                childCode.desc = `${code.desc}, ${seventhChar.text.trim()}`;
+                childCode.depth += 1;
+                childCode.lft = index;
+                childCode.rgt = index + 1;
+                index += 2;
+                queries.push(prisma.icd10CMCode.upsert({
+                  where: { name: childCode.name },
+                  update: childCode,
+                  create: childCode
+                }));
+              }
+            }
             code.rgt = index;
             index += 1;
             queries.push(prisma.icd10CMCode.upsert({
@@ -100,6 +130,7 @@ for await (const events of saxIterator(stream)) {
               create: code
             }));
           }
+          seventhCharCodes.pop();
           break;
         case 'name':
           code = codes.last();
@@ -144,6 +175,9 @@ for await (const events of saxIterator(stream)) {
               create: chapter
             }));
           }
+          break;
+        case 'extension':
+          seventhCharCodes.last().last().text = text;
           break;
       }
     }
